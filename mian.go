@@ -1,12 +1,12 @@
 package main
 
 import (
-	"blog/databases"
+	"blog/models"
 	"blog/router"
 )
 
 func main() {
-	if err := databases.InitDb(); err != nil {
+	if err := models.InitDb(); err != nil {
 		panic(err)
 	}
 

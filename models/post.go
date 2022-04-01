@@ -1,7 +1,6 @@
 package models
 
 import (
-	"blog/databases"
 	"blog/utils/errmsg"
 	"fmt"
 	"gorm.io/gorm"
@@ -19,7 +18,7 @@ type Post struct {
 
 // AddPost add post
 func AddPost(post *Post) (code int) {
-	if err := databases.db.Create(post).Error; err != nil {
+	if err := Db.Create(post).Error; err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCESS
@@ -27,7 +26,7 @@ func AddPost(post *Post) (code int) {
 
 // DeletePost delete post
 func DeletePost(id int) (code int) {
-	if err := databases.db.Delete(&Post{}, id).Error; err != nil {
+	if err := Db.Delete(&Post{}, id).Error; err != nil {
 		fmt.Println(err)
 		return errmsg.ERROR
 	}
@@ -36,16 +35,16 @@ func DeletePost(id int) (code int) {
 
 // GetOnePost get post
 func GetOnePost(id uint) (post Post, code int) {
-	if err := databases.db.Where("id = ?", id).First(&post).Error; err != nil {
+	if err := Db.Where("id = ?", id).First(&post).Error; err != nil {
 		return post, errmsg.ERROR
 	}
-	databases.db.Model(&Post{}).Where("id = ?", id).UpdateColumn("read_count", gorm.Expr("read_count + ?", 1))
+	Db.Model(&Post{}).Where("id = ?", id).UpdateColumn("read_count", gorm.Expr("read_count + ?", 1))
 	return post, errmsg.SUCCESS
 }
 
 // GetPostList get postList
 func GetPostList(pageSize, pageNum int) (posts []Post, code int, count int) {
-	if err := databases.db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&posts).Error; err != nil {
+	if err := Db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&posts).Error; err != nil {
 		return posts, errmsg.ERROR, count
 	}
 	count = len(posts)
@@ -55,7 +54,7 @@ func GetPostList(pageSize, pageNum int) (posts []Post, code int, count int) {
 // EditPost edit post
 func EditPost(post *Post) (code int) {
 
-	if err := databases.db.Model(&Post{}).Where("id = ?", post.ID).Updates(Post{Title: post.Title, Summary: post.Summary, Content: post.Content, CateID: post.CateID}).Error; err != nil {
+	if err := Db.Model(&Post{}).Where("id = ?", post.ID).Updates(Post{Title: post.Title, Summary: post.Summary, Content: post.Content, CateID: post.CateID}).Error; err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCESS
@@ -64,11 +63,11 @@ func EditPost(post *Post) (code int) {
 // GetPostsCate get posts of one cate
 func GetPostsCate(id uint, pageSize, pageNum int) (posts []Post, code int) {
 	cate := Category{}
-	if err := databases.db.Where("id = ?", id).First(&cate).Error; err != nil {
+	if err := Db.Where("id = ?", id).First(&cate).Error; err != nil {
 		return posts, errmsg.ERROR_CATE_NOT_EXIST
 	}
 
-	if err := databases.db.Where("cate_id = ?", id).Find(&posts).Error; err != nil {
+	if err := Db.Where("cate_id = ?", id).Find(&posts).Error; err != nil {
 		return posts, errmsg.ERROR
 	}
 

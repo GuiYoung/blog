@@ -1,7 +1,6 @@
-package databases
+package models
 
 import (
-	"blog/models"
 	"blog/utils"
 	"fmt"
 	"gorm.io/driver/mysql"
@@ -11,7 +10,7 @@ import (
 	"time"
 )
 
-var db *gorm.DB
+var Db *gorm.DB
 
 func InitDb() (err error) {
 	// init config
@@ -26,9 +25,9 @@ func InitDb() (err error) {
 	}
 
 	// create table
-	_ = db.AutoMigrate(&models.Category{}, &models.Post{}, &models.Tag{}, &models.User{})
+	_ = Db.AutoMigrate(&Category{}, &Post{}, &Tag{}, &User{})
 
-	sqlDB, _ := db.DB()
+	sqlDB, _ := Db.DB()
 
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
@@ -40,7 +39,7 @@ func InitDb() (err error) {
 func initMysql(config *utils.MySQLConfig) (err error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.User, config.Password, config.IP, config.Port, config.Database)
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger:                 logger.Default.LogMode(logger.Silent),
 		SkipDefaultTransaction: true,
 		NamingStrategy: schema.NamingStrategy{

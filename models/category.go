@@ -1,7 +1,6 @@
 package models
 
 import (
-	"blog/databases"
 	"blog/utils/errmsg"
 	"errors"
 	"gorm.io/gorm"
@@ -16,7 +15,7 @@ type Category struct {
 // CheckCate check cate
 func CheckCate(name string) (code int) {
 	cate := Category{}
-	if err := databases.db.Where("name = ?", name).First(&cate).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := Db.Where("name = ?", name).First(&cate).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return errmsg.ERROR_CATE_NOT_EXIST
 	}
 	return errmsg.ERROR_CATENAME_USED
@@ -24,7 +23,7 @@ func CheckCate(name string) (code int) {
 
 // CreateCate create cate
 func CreateCate(cate *Category) (code int) {
-	if err := databases.db.Create(cate).Error; err != nil {
+	if err := Db.Create(cate).Error; err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCESS
@@ -32,7 +31,7 @@ func CreateCate(cate *Category) (code int) {
 
 // GetCateList get cate list
 func GetCateList(pageSize, pageNum int) (categories []Category, code int, count int) {
-	if err := databases.db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&categories).Error; err != nil {
+	if err := Db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&categories).Error; err != nil {
 		return categories, errmsg.ERROR, count
 	}
 	count = len(categories)
@@ -41,7 +40,7 @@ func GetCateList(pageSize, pageNum int) (categories []Category, code int, count 
 
 // GetOneCate get one cate
 func GetOneCate(id uint) (cate Category, code int) {
-	if err := databases.db.Where("id = ?", id).First(&cate).Error; err != nil {
+	if err := Db.Where("id = ?", id).First(&cate).Error; err != nil {
 		return cate, errmsg.ERROR
 	}
 	return cate, errmsg.SUCCESS
@@ -49,7 +48,7 @@ func GetOneCate(id uint) (cate Category, code int) {
 
 // EditCateInfo edit cate info
 func EditCateInfo(cate *Category) (code int) {
-	if err := databases.db.Model(&Category{}).Where("id = ?", cate.ID).Updates(Category{Name: cate.Name, Desc: cate.Desc}).Error; err != nil {
+	if err := Db.Model(&Category{}).Where("id = ?", cate.ID).Updates(Category{Name: cate.Name, Desc: cate.Desc}).Error; err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCESS
@@ -57,10 +56,10 @@ func EditCateInfo(cate *Category) (code int) {
 
 // DestroyOneCate destroy one cate
 func DestroyOneCate(cate *Category) (code int) {
-	if err := databases.db.Where("cate_id = ?", cate.ID).Delete(&User{}).Error; err != nil {
+	if err := Db.Where("cate_id = ?", cate.ID).Delete(&User{}).Error; err != nil {
 		return errmsg.ERROR
 	}
-	if err := databases.db.Delete(&cate).Error; err != nil {
+	if err := Db.Delete(&cate).Error; err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCESS

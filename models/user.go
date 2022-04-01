@@ -1,7 +1,6 @@
 package models
 
 import (
-	"blog/databases"
 	"blog/utils/errmsg"
 	"errors"
 	"fmt"
@@ -21,7 +20,7 @@ type User struct {
 // CheckUserExit check user exit
 func CheckUserExit(user *User) int {
 	data := User{}
-	if err := databases.db.Where("id = ?", user.ID).First(&data).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := Db.Where("id = ?", user.ID).First(&data).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		return errmsg.ERROR_USER_NOT_EXIST
 	}
 	return errmsg.SUCCESS
@@ -45,11 +44,11 @@ func CheckUserExit(user *User) int {
 func CreateUser(user *User) int {
 
 	var err error
-	if err = databases.db.Where("user_name = ?", user.UserName).First(&User{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+	if err = Db.Where("user_name = ?", user.UserName).First(&User{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		user.PassWord = Scrypt(user.PassWord)
 
 		fmt.Println(user.PassWord)
-		if err = databases.db.Create(user).Error; err != nil {
+		if err = Db.Create(user).Error; err != nil {
 			fmt.Println(err)
 			return errmsg.ERROR
 		}
@@ -65,7 +64,7 @@ func ChangePwd(user *User) int {
 	user.PassWord = Scrypt(user.PassWord)
 	fmt.Println(user.PassWord)
 	fmt.Println(user.ID)
-	if err := databases.db.Model(&User{}).Where("id = ?", user.ID).Update("pass_word", user.PassWord).Error; err != nil {
+	if err := Db.Model(&User{}).Where("id = ?", user.ID).Update("pass_word", user.PassWord).Error; err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCESS
@@ -73,7 +72,7 @@ func ChangePwd(user *User) int {
 
 // ChangeUserInfo change user info
 func ChangeUserInfo(user *User) int {
-	if err := databases.db.Model(&User{}).Where("id = ?", user.ID).Updates(User{UserName: user.UserName, AuthCode: user.AuthCode}).Error; err != nil {
+	if err := Db.Model(&User{}).Where("id = ?", user.ID).Updates(User{UserName: user.UserName, AuthCode: user.AuthCode}).Error; err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCESS
@@ -81,7 +80,7 @@ func ChangeUserInfo(user *User) int {
 
 // GetUser find user by id
 func GetUser(id uint) (user *User, code int) {
-	if err := databases.db.Where("id = ?", id).First(&user).Error; err != nil {
+	if err := Db.Where("id = ?", id).First(&user).Error; err != nil {
 		return user, errmsg.ERROR
 	}
 	return user, errmsg.SUCCESS
@@ -89,7 +88,7 @@ func GetUser(id uint) (user *User, code int) {
 
 // DeleteUser delete user
 func DeleteUser(user *User) int {
-	if err := databases.db.Delete(&user).Error; err != nil {
+	if err := Db.Delete(&user).Error; err != nil {
 		return errmsg.ERROR
 	}
 	return errmsg.SUCCESS
@@ -97,7 +96,7 @@ func DeleteUser(user *User) int {
 
 // GetUserList get user list
 func GetUserList(pageSize, pageNum int) (users []User, code int, count int) {
-	if err := databases.db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&users).Error; err != nil {
+	if err := Db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&users).Error; err != nil {
 		return users, errmsg.ERROR, count
 	}
 	count = len(users)
@@ -116,7 +115,7 @@ func CheckLogin(user *User) (*User, int) {
 	var data *User
 
 	// check user exits
-	if err := databases.db.Where("name = ?", user.UserName).First(&data).Error; err != nil {
+	if err := Db.Where("name = ?", user.UserName).First(&data).Error; err != nil {
 		return data, errmsg.ERROR_USER_NOT_EXIST
 	}
 
@@ -138,7 +137,7 @@ func CheckFrontLogin(user *User) (*User, int) {
 	var data *User
 
 	// check user exits
-	if err := databases.db.Where("name = ?", user.UserName).First(&data).Error; err != nil {
+	if err := Db.Where("name = ?", user.UserName).First(&data).Error; err != nil {
 		return data, errmsg.ERROR_USER_NOT_EXIST
 	}
 
